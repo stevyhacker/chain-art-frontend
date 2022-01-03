@@ -13,12 +13,19 @@ code {
 }
 
 .description {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   text-align: center;
-  margin-left: 1rem;
-  margin-right: 1rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .image-item {
   text-align: center;
+}
+
+h2 {
+  text-align: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  font-family: Menlo, monospace;
 }

@@ -28,8 +28,8 @@ export const Image = styled.img`
 `;
 
 export const Link = styled.a.attrs({
-  target: "_blank",
-  rel: "noopener noreferrer",
+    target: "_blank",
+    rel: "noopener noreferrer",
 })`
   color: #61dafb;
   margin-top: 10px;
@@ -41,7 +41,8 @@ export const Button = styled.button`
   border-radius: 8px;
   color: #282c34;
   cursor: pointer;
-  font-size: 16px;
+  font-family: Menlo, monospace;
+  font-size: 1rem;
   text-align: center;
   text-decoration: none;
   margin: 0px 20px;
