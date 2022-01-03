@@ -2,23 +2,25 @@ import { useQuery } from "@apollo/react-hooks";
 import { Contract } from "@ethersproject/contracts";
 import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
-
+import ImageUploading from "react-images-uploading";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGlobe, faImage } from '@fortawesome/free-solid-svg-icons'
 import { Body, Button, Header, Image, Link } from "./components";
 import logo from "./ethereumLogo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import { addresses, abis } from "@project/contracts";
-import GET_TRANSFERS from "./graphql/subgraph";
+// import GET_TRANSFERS from "./graphql/subgraph";
 
-async function readOnChainData() {
+async function uploadArt() {
   // Should replace with the end-user wallet, e.g. Metamask
-  const defaultProvider = getDefaultProvider();
+  // const defaultProvider = getDefaultProvider();
   // Create an instance of an ethers.js Contract
   // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
-  const ceaErc20 = new Contract(addresses.ceaErc20, abis.erc20, defaultProvider);
+  // const ceaErc20 = new Contract(addresses.ceaErc20, abis.erc20, defaultProvider);
   // A pre-defined address that owns some CEAERC20 tokens
-  const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
-  console.log({ tokenBalance: tokenBalance.toString() });
+  // const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
+  // console.log({ tokenBalance: tokenBalance.toString() });
 }
 
 function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
@@ -71,14 +73,23 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
 }
 
 function App() {
-  const { loading, error, data } = useQuery(GET_TRANSFERS);
+  // const { loading, error, data } = useQuery(GET_TRANSFERS);
   const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
-  React.useEffect(() => {
-    if (!loading && !error && data && data.transfers) {
-      console.log({ transfers: data.transfers });
-    }
-  }, [loading, error, data]);
+  // React.useEffect(() => {
+  //   if (!loading && !error && data && data.transfers) {
+  //     console.log({ transfers: data.transfers });
+  //   }
+  // }, [loading, error, data]);
+
+
+  const [images, setImages] = React.useState([]);
+  const maxNumber = 1;
+  const onChange = (imageList, addUpdateIndex) => {
+    // data for submit
+    // console.log(imageList, addUpdateIndex);
+    setImages(imageList);
+  };
 
   return (
     <div>
@@ -86,19 +97,65 @@ function App() {
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
       </Header>
       <Body>
-        <Image src={logo} alt="react-logo" />
-        <p>
-          Edit <code>packages/react-app/src/App.js</code> and save to reload.
+        <h2>On-chain Art NFT Minter</h2>
+
+        {/*<Image src={logo} alt="react-logo" />*/}
+        <p className={"description"}>
+          Upload your SVG image here and confirm the transaction.
+          <br/>
+          <i className="far fa-file-image"/>
+          The image will be saved on-chain and an NFT will be minted for you.
         </p>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button hidden onClick={() => readOnChainData()}>
-          Read On-Chain Balance
-        </Button>
-        <Link href="https://ethereum.org/developers/#getting-started" style={{ marginTop: "8px" }}>
-          Learn Ethereum
-        </Link>
-        <Link href="https://reactjs.org">Learn React</Link>
-        <Link href="https://thegraph.com/docs/quick-start">Learn The Graph</Link>
+
+        {/*<Link href="https://ethereum.org/developers/#getting-started" style={{ marginTop: "8px" }}>*/}
+        {/*  Learn Ethereum*/}
+        {/*</Link>*/}
+
+        <ImageUploading
+            value={images}
+            onChange={onChange}
+            dataURLKey="data_url">
+          {({
+              imageList,
+              onImageUpload,
+              onImageRemoveAll,
+              onImageUpdate,
+              onImageRemove,
+              isDragging,
+              dragProps
+            }) => (
+              // write your building UI
+              <div className="upload__image-wrapper">
+                <Button
+                    style={isDragging ? { color: "red" } : null}
+                    onClick={onImageUpload}
+                    {...dragProps} >
+                  <FontAwesomeIcon icon={faImage}  /> <br/>
+                 Pick or Drop Image here
+                </Button>
+                <br/>
+                <br/>
+                {/*<Button onClick={onImageRemoveAll}>Remove image</Button>*/}
+                {imageList.map((image, index) => (
+                    <div key={index} className="image-item">
+                      <img src={image.data_url} alt=""  width="150" />
+                      <div className="image-item__btn-wrapper">
+                        {/*<Button onClick={() => onImageUpdate(index)}>Replace</Button>*/}
+                        {/*<Button onClick={() => onImageRemove(index)}>Remove</Button>*/}
+                        <Button className="fas fa-image" onClick={() => uploadArt()}>
+                          <FontAwesomeIcon icon={faGlobe}  /> <br/>
+                          Upload Art
+                        </Button>
+                      </div>
+                    </div>
+                ))}
+              </div>
+          )}
+        </ImageUploading>
+
+
+
       </Body>
     </div>
   );
