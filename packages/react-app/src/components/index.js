@@ -32,7 +32,8 @@ export const Link = styled.a.attrs({
     rel: "noopener noreferrer",
 })`
   color: #61dafb;
-  margin-top: 10px;
+  text-decoration: none;
+  font-size: 1.5rem;
 `;
 
 export const Button = styled.button`

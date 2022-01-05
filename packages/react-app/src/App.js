@@ -1,28 +1,13 @@
-import {useQuery} from "@apollo/react-hooks";
 import {Contract} from "@ethersproject/contracts";
-import {getDefaultProvider} from "@ethersproject/providers";
 import React, {useEffect, useState} from "react";
 import ImageUploading from "react-images-uploading";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faGlobe, faImage} from '@fortawesome/free-solid-svg-icons'
+import {faGlobe, faImage, faLink} from '@fortawesome/free-solid-svg-icons'
 import {Body, Button, Header, Image, Link} from "./components";
-import logo from "./ethereumLogo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import {addresses, abis} from "@project/contracts";
 
-// import GET_TRANSFERS from "./graphql/subgraph";
-
-async function uploadArt() {
-    // Should replace with the end-user wallet, e.g. Metamask
-    // const defaultProvider = getDefaultProvider();
-    // Create an instance of an ethers.js Contract
-    // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
-    // const ceaErc20 = new Contract(addresses.ceaErc20, abis.erc20, defaultProvider);
-    // A pre-defined address that owns some CEAERC20 tokens
-    // const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
-    // console.log({ tokenBalance: tokenBalance.toString() });
-}
 
 function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
     const [account, setAccount] = useState("");
@@ -83,14 +68,29 @@ function App() {
     //   }
     // }, [loading, error, data]);
 
-
     const [images, setImages] = React.useState([]);
-    const maxNumber = 1;
-    const onChange = (imageList, addUpdateIndex) => {
-        // data for submit
-        // console.log(imageList, addUpdateIndex);
+    const onChange = (imageList) => {
         setImages(imageList);
     };
+
+    function uploadArt(provider, dataUrl) {
+
+        if (provider !== undefined) {
+            const signer = provider.getSigner();
+            // Create an instance of an ethers.js Contract
+            // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
+            const chainArtContract = new Contract(addresses.chainArt, abis.chainArt, provider);
+            chainArtContract.connect(signer);
+            signer.getAddress().then(r => console.log(r));
+            console.log("provider is ok");
+            console.log(dataUrl);
+        } else {
+            console.log("provider is not defined");
+            loadWeb3Modal().then(
+                //todo continue flow
+            );
+        }
+    }
 
     return (
         <div>
@@ -104,7 +104,7 @@ function App() {
                 <p className={"description"}>
                     Upload your image here and confirm the transaction.
                     <br/>
-                    The image will be saved on-chain in SVG format and an NFT will be minted for you.
+                    The image will be saved on-chain in base64 encoding and an NFT will be minted for you.
                     <br/>
                     <br/>
                     Larger image files will be split into multiple transactions. <br/>
@@ -113,10 +113,6 @@ function App() {
                     Other formats will take more space and require more gas == more expensive transactions.
                 </p>
 
-                {/*<Link href="https://ethereum.org/developers/#getting-started" style={{ marginTop: "8px" }}>*/}
-                {/*  Learn Ethereum*/}
-                {/*</Link>*/}
-
                 <ImageUploading
                     value={images}
                     onChange={onChange}
@@ -124,9 +120,6 @@ function App() {
                     {({
                           imageList,
                           onImageUpload,
-                          onImageRemoveAll,
-                          onImageUpdate,
-                          onImageRemove,
                           isDragging,
                           dragProps
                       }) => (
@@ -142,14 +135,12 @@ function App() {
                             </Button>
                             <br/>
                             <br/>
-                            {/*<Button onClick={onImageRemoveAll}>Remove image</Button>*/}
                             {imageList.map((image, index) => (
                                 <div key={index} className="image-item">
                                     <img src={image.data_url} alt="" width="150"/>
                                     <div className="image-item__btn-wrapper">
-                                        {/*<Button onClick={() => onImageUpdate(index)}>Replace</Button>*/}
-                                        {/*<Button onClick={() => onImageRemove(index)}>Remove</Button>*/}
-                                        <Button className="fas fa-image" onClick={() => uploadArt()}>
+                                        <Button className="fas fa-image"
+                                                onClick={() => uploadArt(provider, image.data_url)}>
                                             <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
                                             Upload Art
                                         </Button>
@@ -160,6 +151,15 @@ function App() {
                     )}
                 </ImageUploading>
 
+
+                <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
+
+                <Link href="https://twitter.com/stevyhacker" style={{marginTop: "8px"}}>
+                    Code
+                </Link>
+                <Link href="https://twitter.com/stevyhacker" style={{marginTop: "16px"}}>
+                    Author
+                </Link>
 
             </Body>
         </div>
