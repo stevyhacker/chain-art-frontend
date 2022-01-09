@@ -131,16 +131,22 @@ function App() {
                     <h2>On-chain Art NFT Minter (⛓,🖼)</h2>
 
                     {/*<Image src={logo} alt="react-logo" />*/}
-                    <p className={"description"}>
+                    <p className={"description"} style={{marginBottom: "50px"}}>
                         Upload your image here and confirm the transaction.
                         <br/>
                         The image will be saved on-chain in base64 encoding and an NFT will be minted for you.
                         <br/>
                         <br/>
-                        Larger image files will be split into multiple transactions. <br/>
+                        Image size is limited to several kilobytes right now.
+                        <br/>
+                        V2 will allow saving images over 20kb via multiple transactions.
+                        <br/>
+                        <br/>
                         For the best quality, upload images in SVG format.
                         <br/>
                         Other formats will take more space and require more gas == more expensive transactions.
+                        <br/>
+                        Protocol has a minting fee of 1 MATIC per NFT.
                     </p>
 
                     <ImageUploading
@@ -185,7 +191,7 @@ function App() {
                 <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
                 <Link href="https://opensea.com/TODO_ADD_ADDRESS">
-                    OpenSea
+                    OpenSea Collection
                 </Link>
                 ----
                 <Link href="https://polygonscan.com/stevyhacker">
