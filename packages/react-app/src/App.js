@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import ImageUploading from "react-images-uploading";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faGlobe, faImage, faLink} from '@fortawesome/free-solid-svg-icons'
-import {Body, Button, Header, Image, Link} from "./components";
+import {Body, Button, Header, Image, Link, SmallLink} from "./components";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import {addresses, abis} from "@project/contracts";
@@ -47,18 +47,23 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
         }
 
         fetchAccount();
-    }, [account, provider, setAccount, setRendered,setChain]);
+    }, [account, provider, setAccount, setRendered, setChain]);
 
     return (
         <div>
-            <Button
-                onClick={() => {
-                    if (!provider) {
-                        loadWeb3Modal();
-                    } else {
-                        logoutOfWeb3Modal();
-                    }
-                }}>
+            {chain !== undefined && chain !== " : matic" ?
+                <SmallLink
+                    href="https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/"
+                    className="polygon-warning">Please use Polygon network
+                </SmallLink> : null}
+            <Button className="topbar"
+                    onClick={() => {
+                        if (!provider) {
+                            loadWeb3Modal();
+                        } else {
+                            logoutOfWeb3Modal();
+                        }
+                    }}>
                 {rendered === "" && "Connect Wallet"}
                 {rendered !== "" && rendered} {chain}
             </Button>
@@ -104,62 +109,67 @@ function App() {
     return (
         <div>
             <Header>
-                <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal}/>
+                <div>
+                    <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal}
+                                  logoutOfWeb3Modal={logoutOfWeb3Modal}/>
+                </div>
             </Header>
             <Body>
-                <h2>On-chain Art NFT Minter (⛓,🖼)</h2>
+                <div className="app">
 
-                {/*<Image src={logo} alt="react-logo" />*/}
-                <p className={"description"}>
-                    Upload your image here and confirm the transaction.
-                    <br/>
-                    The image will be saved on-chain in base64 encoding and an NFT will be minted for you.
-                    <br/>
-                    <br/>
-                    Larger image files will be split into multiple transactions. <br/>
-                    For the best quality, upload images in SVG format.
-                    <br/>
-                    Other formats will take more space and require more gas == more expensive transactions.
-                </p>
+                    <h2>On-chain Art NFT Minter (⛓,🖼)</h2>
 
-                <ImageUploading
-                    value={images}
-                    onChange={onChange}
-                    dataURLKey="data_url">
-                    {({
-                          imageList,
-                          onImageUpload,
-                          isDragging,
-                          dragProps
-                      }) => (
-                        // write your building UI
-                        <div className="upload__image-wrapper">
-                            <Button
-                                style={isDragging ? {color: "#2c3e9a"} : null}
-                                onClick={onImageUpload}
-                                {...dragProps} >
-                                <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
+                    {/*<Image src={logo} alt="react-logo" />*/}
+                    <p className={"description"}>
+                        Upload your image here and confirm the transaction.
+                        <br/>
+                        The image will be saved on-chain in base64 encoding and an NFT will be minted for you.
+                        <br/>
+                        <br/>
+                        Larger image files will be split into multiple transactions. <br/>
+                        For the best quality, upload images in SVG format.
+                        <br/>
+                        Other formats will take more space and require more gas == more expensive transactions.
+                    </p>
+
+                    <ImageUploading
+                        value={images}
+                        onChange={onChange}
+                        dataURLKey="data_url">
+                        {({
+                              imageList,
+                              onImageUpload,
+                              isDragging,
+                              dragProps
+                          }) => (
+                            // write your building UI
+                            <div className="upload__image-wrapper">
+                                <Button
+                                    style={isDragging ? {color: "#2c3e9a"} : null}
+                                    onClick={onImageUpload}
+                                    {...dragProps} >
+                                    <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
+                                    <br/>
+                                    {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
+                                </Button>
                                 <br/>
-                                {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
-                            </Button>
-                            <br/>
-                            <br/>
-                            {imageList.map((image, index) => (
-                                <div key={index} className="image-item">
-                                    <img src={image.data_url} alt="" width="150"/>
-                                    <div className="image-item__btn-wrapper">
-                                        <Button className="fas fa-image"
-                                                onClick={() => uploadArt(provider, image.data_url)}>
-                                            <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
-                                            Upload Art
-                                        </Button>
+                                <br/>
+                                {imageList.map((image, index) => (
+                                    <div key={index} className="image-item">
+                                        <img src={image.data_url} alt="" width="150"/>
+                                        <div className="image-item__btn-wrapper">
+                                            <Button className="fas fa-image"
+                                                    onClick={() => uploadArt(provider, image.data_url)}>
+                                                <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
+                                                Upload Art
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </ImageUploading>
-
+                                ))}
+                            </div>
+                        )}
+                    </ImageUploading>
+                </div>
 
                 <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
@@ -169,7 +179,6 @@ function App() {
                 <Link href="https://twitter.com/stevyhacker" style={{marginTop: "16px"}}>
                     Author
                 </Link>
-
             </Body>
         </div>
     );

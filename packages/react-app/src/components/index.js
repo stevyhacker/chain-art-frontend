@@ -36,6 +36,15 @@ export const Link = styled.a.attrs({
   font-size: 1.5rem;
 `;
 
+export const SmallLink = styled.a.attrs({
+    target: "_blank",
+    rel: "noopener noreferrer",
+})`
+  color: #61dafb;
+  font-size: 1.2rem;
+  margin: 20px 20px;
+`;
+
 export const Button = styled.button`
   background-color: #aec00b;
   border: none;
