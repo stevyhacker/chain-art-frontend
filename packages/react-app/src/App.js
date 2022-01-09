@@ -5,9 +5,16 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faGlobe, faImage, faLink} from '@fortawesome/free-solid-svg-icons'
 import {Body, Button, Header, Link, SmallLink} from "./components";
 import useWeb3Modal from "./hooks/useWeb3Modal";
+import {css} from "@emotion/react";
+import ClockLoader from "react-spinners/ClockLoader";
 
 import {addresses, abis} from "@project/contracts";
 
+// Can be a string as well. Need to ensure each key-value pair ends with ;
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 
 function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
     const [account, setAccount] = useState("");
@@ -75,7 +82,8 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
 }
 
 function App() {
-    // const { loading, error, data } = useQuery(GET_TRANSFERS);
+    let [loading, setLoading] = useState(false);
+
     const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
     // React.useEffect(() => {
@@ -89,21 +97,33 @@ function App() {
         setImages(imageList);
     };
 
+    async function checkForConfirmation(tx) {
+        console.log("Transaction hash: " + tx.hash);
+        const txReceipt = await provider.getTransactionReceipt(tx.hash);
+        if (txReceipt && txReceipt.blockNumber) {
+            console.log("Transaction mined: " + txReceipt.blockNumber);
+            return txReceipt;
+        }
+    }
+
     async function mintArt(provider, imageData) {
         const signer = provider.getSigner();
         // Create an instance of an ethers.js Contract
         const chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
         signer.getAddress().then(r => console.log("User account: " + r));
         const mintPrice = await chainArtContract.mintPrice();
-        console.log("Balance before: " + await provider.getBalance(signer.getAddress()));
+        // console.log("Balance before: " + await provider.getBalance(signer.getAddress()));
 
         const tx = await chainArtContract.connect(signer).createFromBase64(imageData.toString(), {
             value: mintPrice,
         });
-        await tx.wait(1);
 
-        console.log("Balance after: " + await provider.getBalance(signer.getAddress()));
-        console.log(`You can view the tokenURI here ${await chainArtContract.tokenURI(0)}`);
+        //TODO CLEAR INPUT()
+        setLoading(!loading);
+        await checkForConfirmation(tx);
+        setLoading(!loading)
+        // console.log("Balance after: " + await provider.getBalance(signer.getAddress()));
+        // console.log(`You can view the tokenURI here ${await chainArtContract.tokenURI(0)}`);
     }
 
     function uploadArtBtn(provider, imageData) {
@@ -186,6 +206,13 @@ function App() {
                             </div>
                         )}
                     </ImageUploading>
+
+                    <div className="sweet-loading">
+                        {/*<button onClick={() => setLoading(!loading)}>Toggle Loader</button>*/}
+                        {loading ? <p>Minting NFT…</p> : ""}
+                        <ClockLoader color="#fff" loading={loading} css={override} size={120}/>
+                    </div>
+
                 </div>
 
                 <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>

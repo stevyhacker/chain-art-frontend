@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@apollo/react-hooks": "^4.0.0",
+    "@emotion/react": "^11.7.1",
     "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/providers": "^5.5.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
@@ -39,6 +40,7 @@
     "react-dom": "17.0.2",
     "react-images-uploading": "^3.1.3",
     "react-scripts": "4.0.3",
+    "react-spinners": "^0.11.0",
     "react-svgmt": "^1.1.11",
     "styled-components": "^5.3.3",
     "web3modal": "^1.9.5"
