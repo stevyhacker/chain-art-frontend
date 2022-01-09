@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import ImageUploading from "react-images-uploading";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faGlobe, faImage, faLink} from '@fortawesome/free-solid-svg-icons'
-import {Body, Button, Header, Image, Link, SmallLink} from "./components";
+import {Body, Button, Header, Link, SmallLink} from "./components";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import {addresses, abis} from "@project/contracts";
@@ -30,14 +30,16 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
                 const network = await provider.getNetwork();
                 const networkName = network.name;
                 // const networkName = await provider.getNetwork().getChainId();
+                console.log("Chain from ENV: " + process.env.REACT_APP_NETWORK);
+                console.log("Account: : " + account);
 
                 // Render either the ENS name or the shortened account address.
-                try {
-                    const name = await provider.lookupAddress(accounts[0]);
-                    setRendered(name);
-                } catch (e) {
-                    setRendered(account.substring(0, 6) + "..." + account.substring(36));
-                }
+                // try {
+                //     const name = await provider.lookupAddress(accounts[0]);
+                //     setRendered(name);
+                // } catch (e) {
+                setRendered(account.substring(0, 6) + "..." + account.substring(36));
+                // }
                 setChain(" : " + networkName);
             } catch (err) {
                 setAccount("");
@@ -51,7 +53,7 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
 
     return (
         <div>
-            {chain !== undefined && chain !== " : matic" ?
+            {chain !== undefined && chain !== " : " + process.env.REACT_APP_NETWORK ?
                 <SmallLink
                     href="https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/"
                     className="polygon-warning">Please use Polygon network
@@ -87,22 +89,31 @@ function App() {
         setImages(imageList);
     };
 
-    function uploadArt(provider, dataUrl) {
+    async function mintArt(provider, imageData) {
+        const signer = provider.getSigner();
+        // Create an instance of an ethers.js Contract
+        const chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
+        signer.getAddress().then(r => console.log("User account: " + r));
+        const mintPrice = await chainArtContract.mintPrice();
+        console.log("Balance before: " + await provider.getBalance(signer.getAddress()));
+
+        const tx = await chainArtContract.connect(signer).createFromBase64(imageData.toString(), {
+            value: mintPrice,
+        });
+        await tx.wait(1);
+
+        console.log("Balance after: " + await provider.getBalance(signer.getAddress()));
+        console.log(`You can view the tokenURI here ${await chainArtContract.tokenURI(0)}`);
+    }
+
+    function uploadArtBtn(provider, imageData) {
+
+        console.log("Image data: " + imageData);
 
         if (provider !== undefined) {
-            const signer = provider.getSigner();
-            // Create an instance of an ethers.js Contract
-            // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
-            const chainArtContract = new Contract(addresses.chainArt, abis.chainArt, provider);
-            chainArtContract.connect(signer);
-            signer.getAddress().then(r => console.log(r));
-            console.log("provider is ok");
-            console.log(dataUrl);
+            mintArt(provider, imageData);
         } else {
-            console.log("provider is not defined");
-            loadWeb3Modal().then(
-                //todo continue flow
-            );
+            loadWeb3Modal().then(pr => mintArt(pr, imageData));
         }
     }
 
@@ -159,7 +170,7 @@ function App() {
                                         <img src={image.data_url} alt="" width="150"/>
                                         <div className="image-item__btn-wrapper">
                                             <Button className="fas fa-image"
-                                                    onClick={() => uploadArt(provider, image.data_url)}>
+                                                    onClick={() => uploadArtBtn(provider, image.data_url)}>
                                                 <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
                                                 Upload Art
                                             </Button>
@@ -173,10 +184,15 @@ function App() {
 
                 <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
-                <Link href="https://twitter.com/stevyhacker" style={{marginTop: "8px"}}>
-                    Code
+                <Link href="https://opensea.com/TODO_ADD_ADDRESS">
+                    OpenSea
                 </Link>
-                <Link href="https://twitter.com/stevyhacker" style={{marginTop: "16px"}}>
+                ----
+                <Link href="https://polygonscan.com/stevyhacker">
+                    Contract
+                </Link>
+                ----
+                <Link href="https://twitter.com/stevyhacker">
                     Author
                 </Link>
             </Body>

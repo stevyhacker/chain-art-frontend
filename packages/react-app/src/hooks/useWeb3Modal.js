@@ -7,7 +7,7 @@ import Web3Modal from "web3modal";
 // You can get a key for free at https://infura.io/register
 const INFURA_ID = process.env.REACT_APP_INFURA_KEY;
 
-const NETWORK = process.env.REACT_APP_ETH_NETWORK;
+const NETWORK = process.env.REACT_APP_NETWORK;
 
 function useWeb3Modal(config = {}) {
   const [provider, setProvider] = useState();
