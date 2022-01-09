@@ -1,6 +1,6 @@
 
 const addresses = {
-  chainArtRinkeby: "0xfffb7955ecaef5cb4b0413d9f9e43c590b017456",
+  chainArtRinkeby: "0xf9138253be75937Ba37A553C7154034259368009",
 };
 
 export default addresses;

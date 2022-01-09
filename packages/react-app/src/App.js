@@ -190,11 +190,11 @@ function App() {
 
                 <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
-                <Link href="https://opensea.com/TODO_ADD_ADDRESS">
+                <Link href="https://testnets.opensea.io/collection/chain-art-v2">
                     OpenSea Collection
                 </Link>
                 ----
-                <Link href="https://polygonscan.com/stevyhacker">
+                <Link href="https://rinkeby.etherscan.io/address/0xf9138253be75937ba37a553c7154034259368009">
                     Contract
                 </Link>
                 ----
