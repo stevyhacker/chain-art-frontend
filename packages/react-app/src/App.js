@@ -12,6 +12,7 @@ import {addresses, abis} from "@project/contracts";
 function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
     const [account, setAccount] = useState("");
     const [rendered, setRendered] = useState("");
+    const [chain, setChain] = useState("");
 
     useEffect(() => {
         async function fetchAccount() {
@@ -25,14 +26,19 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
                 setAccount(accounts[0]);
 
                 // Resolve the ENS name for the first account.
-                const name = await provider.lookupAddress(accounts[0]);
+
+                const network = await provider.getNetwork();
+                const networkName = network.name;
+                // const networkName = await provider.getNetwork().getChainId();
 
                 // Render either the ENS name or the shortened account address.
-                if (name) {
+                try {
+                    const name = await provider.lookupAddress(accounts[0]);
                     setRendered(name);
-                } else {
+                } catch (e) {
                     setRendered(account.substring(0, 6) + "..." + account.substring(36));
                 }
+                setChain(" : " + networkName);
             } catch (err) {
                 setAccount("");
                 setRendered("");
@@ -41,20 +47,23 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
         }
 
         fetchAccount();
-    }, [account, provider, setAccount, setRendered]);
+    }, [account, provider, setAccount, setRendered,setChain]);
 
     return (
-        <Button
-            onClick={() => {
-                if (!provider) {
-                    loadWeb3Modal();
-                } else {
-                    logoutOfWeb3Modal();
-                }
-            }}>
-            {rendered === "" && "Connect Wallet"}
-            {rendered !== "" && rendered}
-        </Button>
+        <div>
+            <Button
+                onClick={() => {
+                    if (!provider) {
+                        loadWeb3Modal();
+                    } else {
+                        logoutOfWeb3Modal();
+                    }
+                }}>
+                {rendered === "" && "Connect Wallet"}
+                {rendered !== "" && rendered} {chain}
+            </Button>
+        </div>
+
     );
 }
 
