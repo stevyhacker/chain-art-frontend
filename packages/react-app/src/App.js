@@ -37,8 +37,8 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
                 const network = await provider.getNetwork();
                 const networkName = network.name;
                 // const networkName = await provider.getNetwork().getChainId();
-                console.log("Chain from ENV: " + process.env.REACT_APP_NETWORK);
-                console.log("Account: : " + account);
+                // console.log("Chain from ENV: " + process.env.REACT_APP_NETWORK);
+                // console.log("Account: : " + account);
 
                 // Render either the ENS name or the shortened account address.
                 // try {
@@ -86,12 +86,6 @@ function App() {
     let [transactionInProgress, setTransactionInProgress] = useState();
 
     const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
-
-    // React.useEffect(() => {
-    //   if (!loading && !error && data && data.transfers) {
-    //     console.log({ transfers: data.transfers });
-    //   }
-    // }, [loading, error, data]);
 
     const [images, setImages] = React.useState([]);
     const onChange = (imageList) => {
@@ -152,7 +146,6 @@ function App() {
 
                     <h2>On-chain Art NFT Minter (⛓,🖼)</h2>
 
-                    {/*<Image src={logo} alt="react-logo" />*/}
                     <p className={"description"} style={{marginBottom: "50px"}}>
                         Upload your image here and confirm the transaction.
                         <br/>
@@ -188,7 +181,11 @@ function App() {
                                 <div className="upload__image-wrapper">
                                     <Button
                                         style={isDragging ? {color: "#2c3e9a"} : null}
-                                        onClick={onImageUpload}
+                                        onClick={() => {
+                                            onImageUpload();
+                                            setLoading(false);
+                                            setTransactionInProgress("");
+                                        }}
                                         {...dragProps} >
                                         <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
                                         <br/>
@@ -219,12 +216,12 @@ function App() {
                     </ImageUploading>
 
                     <div className="sweet-loading">
-                        {loading ? <h5>Minting NFT…</h5> : ""}
+                        {loading ? <h5 style={{marginBottom: "1.5rem"}}>Minting NFT…</h5> : ""}
                         <ClockLoader color="#fff" loading={loading} css={override} size={100}/>
-                        {transactionInProgress && <p className={"transaction"}>Check here for progress:
-                            <a href={"https://rinkeby.etherscan.io/tx/{transactionInProgress}"}>
+                        {transactionInProgress && <p className={"transaction"}>Click here for progress: <br/>
+                            <SmallLink href={"https://rinkeby.etherscan.io/tx/" + transactionInProgress}>
                                 {transactionInProgress.substring(0, 8)}...{transactionInProgress.substring(60)}
-                            </a></p>}
+                            </SmallLink></p>}
                     </div>
 
                 </div>
