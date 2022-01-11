@@ -83,6 +83,7 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
 
 function App() {
     let [loading, setLoading] = useState(false);
+    let [transactionInProgress, setTransactionInProgress] = useState();
 
     const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
@@ -99,6 +100,7 @@ function App() {
 
     async function checkForConfirmation(tx) {
         console.log("Transaction hash: " + tx.hash);
+        setTransactionInProgress(tx.hash);
         const txReceipt = await provider.getTransactionReceipt(tx.hash);
         if (txReceipt && txReceipt.blockNumber) {
             console.log("Transaction mined: " + txReceipt.blockNumber);
@@ -106,7 +108,7 @@ function App() {
         }
     }
 
-    async function mintArt(provider, imageData) {
+    async function mintArt(provider, imageData, callback) {
         const signer = provider.getSigner();
         // Create an instance of an ethers.js Contract
         const chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
@@ -118,7 +120,7 @@ function App() {
             value: mintPrice,
         });
 
-        //TODO CLEAR INPUT()
+        callback();
         setLoading(!loading);
         await checkForConfirmation(tx);
         setLoading(!loading)
@@ -126,14 +128,14 @@ function App() {
         // console.log(`You can view the tokenURI here ${await chainArtContract.tokenURI(0)}`);
     }
 
-    function uploadArtBtn(provider, imageData) {
+    function uploadArtBtn(provider, imageData, callback) {
 
         // console.log("Image data: " + imageData);
 
         if (provider !== undefined) {
-            mintArt(provider, imageData);
+            mintArt(provider, imageData, callback);
         } else {
-            loadWeb3Modal().then(pr => mintArt(pr, imageData));
+            loadWeb3Modal().then(pr => mintArt(pr, imageData, callback));
         }
     }
 
@@ -177,22 +179,12 @@ function App() {
                         {({
                               imageList,
                               onImageUpload,
+                              onImageRemoveAll,
                               isDragging,
                               dragProps,
                               errors
                           }) => (
-                            // write your building UI
-
                             <div>
-
-                                <div>
-                                    {/*{errors.maxNumber && <span>Number of selected images exceed maxNumber</span>}*/}
-                                    {/*{errors.acceptType && <span>Your selected file type is not allow</span>}*/}
-
-                                    {/*{errors.resolution &&*/}
-                                    {/*<span>Selected file is not match your desired resolution</span>}*/}
-                                </div>
-
                                 <div className="upload__image-wrapper">
                                     <Button
                                         style={isDragging ? {color: "#2c3e9a"} : null}
@@ -209,32 +201,35 @@ function App() {
                                             <img src={image.data_url} alt="" width="150"/>
                                             <div className="image-item__btn-wrapper">
                                                 <Button className="fas fa-image"
-                                                        onClick={() => uploadArtBtn(provider, image.data_url)}>
+                                                        onClick={() => {
+                                                            uploadArtBtn(provider, image.data_url, onImageRemoveAll);
+                                                        }}>
                                                     <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
                                                     Upload Art
                                                 </Button>
                                             </div>
                                         </div>
                                     ))}
-
                                 </div>
 
                                 {errors && errors.maxFileSize &&
                                 <p className={"error-warning"}>Selected file size exceeds allowed size!</p>}
-
                             </div>
                         )}
                     </ImageUploading>
 
                     <div className="sweet-loading">
-                        {/*<button onClick={() => setLoading(!loading)}>Toggle Loader</button>*/}
-                        {loading ? <p>Minting NFT…</p> : ""}
-                        <ClockLoader color="#fff" loading={loading} css={override} size={120}/>
+                        {loading ? <h5>Minting NFT…</h5> : ""}
+                        <ClockLoader color="#fff" loading={loading} css={override} size={100}/>
+                        {transactionInProgress && <p className={"transaction"}>Check here for progress:
+                            <a href={"https://rinkeby.etherscan.io/tx/{transactionInProgress}"}>
+                                {transactionInProgress.substring(0, 8)}...{transactionInProgress.substring(60)}
+                            </a></p>}
                     </div>
 
                 </div>
 
-                <p style={{marginTop: "200px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
+                <p style={{marginTop: "160px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
                 <Link href="https://testnets.opensea.io/collection/chain-art-v2">
                     OpenSea Collection
@@ -244,7 +239,7 @@ function App() {
                     Contract
                 </Link>
                 ----
-                <Link href="https://twitter.com/stevyhacker">
+                <Link style={{marginBottom: "5rem"}} href="https://twitter.com/stevyhacker">
                     Author
                 </Link>
             </Body>
