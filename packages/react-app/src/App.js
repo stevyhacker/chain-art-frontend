@@ -128,7 +128,7 @@ function App() {
 
     function uploadArtBtn(provider, imageData) {
 
-        console.log("Image data: " + imageData);
+        // console.log("Image data: " + imageData);
 
         if (provider !== undefined) {
             mintArt(provider, imageData);
@@ -157,9 +157,9 @@ function App() {
                         The image will be saved on-chain in base64 encoding and an NFT will be minted for you.
                         <br/>
                         <br/>
-                        Image size is limited to several kilobytes right now.
+                        Image file size is limited to under 20 kb right now.
                         <br/>
-                        V2 will allow saving images over 20kb via multiple transactions.
+                        V2 will allow saving larger images via multiple transactions.
                         <br/>
                         <br/>
                         For the best quality, upload images in SVG format.
@@ -172,37 +172,56 @@ function App() {
                     <ImageUploading
                         value={images}
                         onChange={onChange}
+                        maxFileSize={20480}
                         dataURLKey="data_url">
                         {({
                               imageList,
                               onImageUpload,
                               isDragging,
-                              dragProps
+                              dragProps,
+                              errors
                           }) => (
                             // write your building UI
-                            <div className="upload__image-wrapper">
-                                <Button
-                                    style={isDragging ? {color: "#2c3e9a"} : null}
-                                    onClick={onImageUpload}
-                                    {...dragProps} >
-                                    <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
+
+                            <div>
+
+                                <div>
+                                    {/*{errors.maxNumber && <span>Number of selected images exceed maxNumber</span>}*/}
+                                    {/*{errors.acceptType && <span>Your selected file type is not allow</span>}*/}
+
+                                    {/*{errors.resolution &&*/}
+                                    {/*<span>Selected file is not match your desired resolution</span>}*/}
+                                </div>
+
+                                <div className="upload__image-wrapper">
+                                    <Button
+                                        style={isDragging ? {color: "#2c3e9a"} : null}
+                                        onClick={onImageUpload}
+                                        {...dragProps} >
+                                        <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
+                                        <br/>
+                                        {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
+                                    </Button>
                                     <br/>
-                                    {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
-                                </Button>
-                                <br/>
-                                <br/>
-                                {imageList.map((image, index) => (
-                                    <div key={index} className="image-item">
-                                        <img src={image.data_url} alt="" width="150"/>
-                                        <div className="image-item__btn-wrapper">
-                                            <Button className="fas fa-image"
-                                                    onClick={() => uploadArtBtn(provider, image.data_url)}>
-                                                <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
-                                                Upload Art
-                                            </Button>
+                                    <br/>
+                                    {imageList.map((image, index) => (
+                                        <div key={index} className="image-item">
+                                            <img src={image.data_url} alt="" width="150"/>
+                                            <div className="image-item__btn-wrapper">
+                                                <Button className="fas fa-image"
+                                                        onClick={() => uploadArtBtn(provider, image.data_url)}>
+                                                    <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
+                                                    Upload Art
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+
+                                </div>
+
+                                {errors && errors.maxFileSize &&
+                                <p className={"error-warning"}>Selected file size exceeds allowed size!</p>}
+
                             </div>
                         )}
                     </ImageUploading>
