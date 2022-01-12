@@ -36,7 +36,7 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
 
                 const network = await provider.getNetwork();
                 const networkName = network.name;
-                // const networkName = await provider.getNetwork().getChainId();
+                // const chainId = await provider.getNetwork().getChainId();
                 // console.log("Chain from ENV: " + process.env.REACT_APP_NETWORK);
                 // console.log("Account: : " + account);
 
@@ -96,6 +96,7 @@ function App() {
         console.log("Transaction hash: " + tx.hash);
         setTransactionInProgress(tx.hash);
         const txReceipt = await provider.getTransactionReceipt(tx.hash);
+
         if (txReceipt && txReceipt.blockNumber) {
             console.log("Transaction mined: " + txReceipt.blockNumber);
             return txReceipt;
@@ -105,10 +106,20 @@ function App() {
     async function mintArt(provider, imageData, callback) {
         const signer = provider.getSigner();
         // Create an instance of an ethers.js Contract
-        const chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
-        signer.getAddress().then(r => console.log("User account: " + r));
+        let chainArtContract = new Contract(addresses.chainArtPolygon, abis.chainArt, provider);
+        const network = await provider.getNetwork();
+        if(network.name === "rinkeby"){
+            chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
+        }
+
+        // signer.getAddress().then(r => console.log("User account: " + r));
         const mintPrice = await chainArtContract.mintPrice();
         // console.log("Balance before: " + await provider.getBalance(signer.getAddress()));
+
+        // chainArtContract.on("CreatedChainArtNFT", (tokenId) => {
+        //     console.log(`Token #${tokenId} minted`);
+        //     setLoading(false)
+        // });
 
         const tx = await chainArtContract.connect(signer).createFromBase64(imageData.toString(), {
             value: mintPrice,
@@ -117,9 +128,15 @@ function App() {
         callback();
         setLoading(!loading);
         await checkForConfirmation(tx);
-        setLoading(!loading)
+
+        clearData();
         // console.log("Balance after: " + await provider.getBalance(signer.getAddress()));
         // console.log(`You can view the tokenURI here ${await chainArtContract.tokenURI(0)}`);
+    }
+
+    function clearData() {
+        setLoading(false);
+        setTransactionInProgress("");
     }
 
     function uploadArtBtn(provider, imageData, callback) {
@@ -183,8 +200,7 @@ function App() {
                                         style={isDragging ? {color: "#2c3e9a"} : null}
                                         onClick={() => {
                                             onImageUpload();
-                                            setLoading(false);
-                                            setTransactionInProgress("");
+                                            clearData();
                                         }}
                                         {...dragProps} >
                                         <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>

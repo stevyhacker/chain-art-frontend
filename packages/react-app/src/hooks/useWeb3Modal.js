@@ -25,6 +25,9 @@ function useWeb3Modal(config = {}) {
           package: WalletConnectProvider,
           options: {
             infuraId,
+            rpc: {
+                137: process.env.REACT_APP_ALCHEMY_KEY
+            }
           },
         },
       },
