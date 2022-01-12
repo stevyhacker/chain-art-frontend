@@ -235,7 +235,7 @@ function App() {
                         {loading ? <h5 style={{marginBottom: "1.5rem"}}>Minting NFT…</h5> : ""}
                         <ClockLoader color="#fff" loading={loading} css={override} size={100}/>
                         {transactionInProgress && <p className={"transaction"}>Click here for progress: <br/>
-                            <SmallLink href={"https://rinkeby.etherscan.io/tx/" + transactionInProgress}>
+                            <SmallLink href={"https://polygonscan.com/tx/" + transactionInProgress}>
                                 {transactionInProgress.substring(0, 8)}...{transactionInProgress.substring(60)}
                             </SmallLink></p>}
                     </div>
@@ -244,11 +244,12 @@ function App() {
 
                 <p style={{marginTop: "160px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
 
-                <Link href="https://testnets.opensea.io/collection/chain-art-v2">
+                <Link href="https://opensea.io/collection/chain-art-1">
                     OpenSea Collection
                 </Link>
                 ----
-                <Link href="https://rinkeby.etherscan.io/address/0xf9138253be75937ba37a553c7154034259368009">
+                {/*<Link href="https://rinkeby.etherscan.io/address/0xf9138253be75937ba37a553c7154034259368009">*/}
+                <Link href="https://polygonscan.com/address/0x4adff2f8da3fcdc80dc2f1e6f32c2b26baa27048#code">
                     Contract
                 </Link>
                 ----
