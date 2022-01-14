@@ -174,13 +174,10 @@ function App() {
                         <br/>
                         <br/>
                         Image file size is limited to under 20 kb right now.
-                        <br/>
-                        V2 will allow saving larger images via multiple transactions.
-                        <br/>
-                        <br/>
                         For the best quality, upload images in SVG format.
                         <br/>
                         Other formats will take more space and require more gas == more expensive transactions.
+                        <br/>
                         <br/>
                         Protocol has a minting fee of 1 MATIC per NFT.
                         <br/>
