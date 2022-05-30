@@ -7,8 +7,25 @@ import {Body, Button, Header, Link, SmallLink} from "./components";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 import {css} from "@emotion/react";
 import ClockLoader from "react-spinners/ClockLoader";
+import '@rainbow-me/rainbowkit/styles.css';
+
+import {
+    getDefaultWallets,
+    RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+import {
+    chain,
+    configureChains,
+    createClient,
+    WagmiConfig,
+} from 'wagmi';
+import {alchemyProvider} from 'wagmi/providers/alchemy';
+import {publicProvider} from 'wagmi/providers/public';
+import {ConnectButton} from '@rainbow-me/rainbowkit';
 
 import {addresses, abis} from "@project/contracts";
+import Content from "./components/Content";
+import Footer from "./components/Footer";
 
 // Can be a string as well. Need to ensure each key-value pair ends with ;
 const override = css`
@@ -76,6 +93,7 @@ function WalletButton({provider, loadWeb3Modal, logoutOfWeb3Modal}) {
                 {rendered === "" && "Connect Wallet"}
                 {rendered !== "" && rendered} {chain}
             </Button>
+            <ConnectButton/>
         </div>
 
     );
@@ -85,7 +103,26 @@ function App() {
     let [loading, setLoading] = useState(false);
     let [transactionInProgress, setTransactionInProgress] = useState();
 
-    const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
+    const [provider2, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
+
+    const {chains, provider} = configureChains(
+        [chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum],
+        [
+            alchemyProvider({alchemyId: process.env.ALCHEMY_ID}),
+            publicProvider()
+        ]
+    );
+
+    const {connectors} = getDefaultWallets({
+        appName: 'Chain Art',
+        chains
+    });
+
+    const wagmiClient = createClient({
+        autoConnect: true,
+        connectors,
+        provider
+    })
 
     const [images, setImages] = React.useState([]);
     const onChange = (imageList) => {
@@ -108,7 +145,7 @@ function App() {
         // Create an instance of an ethers.js Contract
         let chainArtContract = new Contract(addresses.chainArtPolygon, abis.chainArt, provider);
         const network = await provider.getNetwork();
-        if(network.name === "rinkeby"){
+        if (network.name === "rinkeby") {
             chainArtContract = new Contract(addresses.chainArtRinkeby, abis.chainArt, provider);
         }
 
@@ -151,119 +188,85 @@ function App() {
     }
 
     return (
-        <div>
-            <Header>
+        <WagmiConfig client={wagmiClient}>
+            <RainbowKitProvider chains={chains}>
                 <div>
-                    <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal}
-                                  logoutOfWeb3Modal={logoutOfWeb3Modal}/>
-                </div>
-            </Header>
-            <Body>
-                <div className="app">
+                    <Header>
+                        <div>
+                            <WalletButton provider={provider2} loadWeb3Modal={loadWeb3Modal}
+                                          logoutOfWeb3Modal={logoutOfWeb3Modal}/>
+                            <ConnectButton/>
+                        </div>
+                    </Header>
+                    <Body>
+                        <div className="app">
 
-                    <h2>On-chain Art NFT Minter (⛓,🖼)</h2>
+                            <Content/>
 
-                    <p className={"description"} style={{marginBottom: "50px"}}>
-                        Why on-chain minting?
-                        <br/>
-                        Because NFTs today store data on servers or IPFS which are in no way related to the blockchain which hosts NFTs.
-                        <br/>
-                        Here the images will be saved on-chain in base64 encoding and an NFT will be minted for you.
-                        <br/>
-                        You can get the metadata and art straight from Polygonscan.
-                        <br/>
-                        <br/>
-                        Image file size is limited to under 20 kb right now.
-                        For the best quality, upload images in SVG format.
-                        <br/>
-                        Other formats will take more space and require more gas == more expensive transactions.
-                        <br/>
-                        <br/>
-                        Protocol has a minting fee of 1 MATIC per NFT.
-                        <br/>
-                        Upload your image here and confirm the transaction.
-                        <br/>
-                        After the transaction is mined you can see the NFT on your wallet on OpenSea.
-
-                    </p>
-
-                    <ImageUploading
-                        value={images}
-                        onChange={onChange}
-                        maxFileSize={20480}
-                        dataURLKey="data_url">
-                        {({
-                              imageList,
-                              onImageUpload,
-                              onImageRemoveAll,
-                              isDragging,
-                              dragProps,
-                              errors
-                          }) => (
-                            <div>
-                                <div className="upload__image-wrapper">
-                                    <Button
-                                        style={isDragging ? {color: "#2c3e9a"} : null}
-                                        onClick={() => {
-                                            onImageUpload();
-                                            clearData();
-                                        }}
-                                        {...dragProps} >
-                                        <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
-                                        <br/>
-                                        {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
-                                    </Button>
-                                    <br/>
-                                    <br/>
-                                    {imageList.map((image, index) => (
-                                        <div key={index} className="image-item">
-                                            <img src={image.data_url} alt="" width="150"/>
-                                            <div className="image-item__btn-wrapper">
-                                                <Button className="fas fa-image"
-                                                        onClick={() => {
-                                                            uploadArtBtn(provider, image.data_url, onImageRemoveAll);
-                                                        }}>
-                                                    <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
-                                                    Upload Art
-                                                </Button>
-                                            </div>
+                            <ImageUploading
+                                value={images}
+                                onChange={onChange}
+                                maxFileSize={20480}
+                                dataURLKey="data_url">
+                                {({
+                                      imageList,
+                                      onImageUpload,
+                                      onImageRemoveAll,
+                                      isDragging,
+                                      dragProps,
+                                      errors
+                                  }) => (
+                                    <div>
+                                        <div className="upload__image-wrapper">
+                                            <Button
+                                                style={isDragging ? {color: "#2c3e9a"} : null}
+                                                onClick={() => {
+                                                    onImageUpload();
+                                                    clearData();
+                                                }}
+                                                {...dragProps} >
+                                                <FontAwesomeIcon icon={faImage} size={"lg"}/> <br/>
+                                                <br/>
+                                                {isDragging ? "Drop Image here" : "Pick or Drag an Image here"}
+                                            </Button>
+                                            <br/>
+                                            <br/>
+                                            {imageList.map((image, index) => (
+                                                <div key={index} className="image-item">
+                                                    <img src={image.data_url} alt="" width="150"/>
+                                                    <div className="image-item__btn-wrapper">
+                                                        <Button className="fas fa-image"
+                                                                onClick={() => {
+                                                                    uploadArtBtn(provider, image.data_url, onImageRemoveAll);
+                                                                }}>
+                                                            <FontAwesomeIcon icon={faGlobe} size={"lg"}/> <br/><br/>
+                                                            Upload Art
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
 
-                                {errors && errors.maxFileSize &&
-                                <p className={"error-warning"}>Selected file size exceeds allowed size!</p>}
+                                        {errors && errors.maxFileSize &&
+                                            <p className={"error-warning"}>Selected file size exceeds allowed size!</p>}
+                                    </div>
+                                )}
+                            </ImageUploading>
+
+                            <div className="sweet-loading">
+                                {loading ? <h5 style={{marginBottom: "1.5rem"}}>Minting NFT…</h5> : ""}
+                                <ClockLoader color="#fff" loading={loading} css={override} size={100}/>
+                                {transactionInProgress && <p className={"transaction"}>Click here for progress: <br/>
+                                    <SmallLink href={"https://polygonscan.com/tx/" + transactionInProgress}>
+                                        {transactionInProgress.substring(0, 8)}...{transactionInProgress.substring(60)}
+                                    </SmallLink></p>}
                             </div>
-                        )}
-                    </ImageUploading>
-
-                    <div className="sweet-loading">
-                        {loading ? <h5 style={{marginBottom: "1.5rem"}}>Minting NFT…</h5> : ""}
-                        <ClockLoader color="#fff" loading={loading} css={override} size={100}/>
-                        {transactionInProgress && <p className={"transaction"}>Click here for progress: <br/>
-                            <SmallLink href={"https://polygonscan.com/tx/" + transactionInProgress}>
-                                {transactionInProgress.substring(0, 8)}...{transactionInProgress.substring(60)}
-                            </SmallLink></p>}
-                    </div>
-
+                        </div>
+                        <Footer/>
+                    </Body>
                 </div>
-
-                <p style={{marginTop: "160px"}}><FontAwesomeIcon icon={faLink}/> Links:</p>
-
-                <Link href="https://opensea.io/collection/chain-art-1">
-                    OpenSea Collection
-                </Link>
-                ----
-                {/*<Link href="https://rinkeby.etherscan.io/address/0xf9138253be75937ba37a553c7154034259368009">*/}
-                <Link href="https://polygonscan.com/address/0x4adff2f8da3fcdc80dc2f1e6f32c2b26baa27048#code">
-                    Contract
-                </Link>
-                ----
-                <Link style={{marginBottom: "5rem"}} href="https://twitter.com/stevyhacker">
-                    Author
-                </Link>
-            </Body>
-        </div>
+            </RainbowKitProvider>
+        </WagmiConfig>
     );
 }
 
